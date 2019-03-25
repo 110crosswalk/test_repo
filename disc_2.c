@@ -15,8 +15,10 @@
 *
 *  You should have received a copy of the GNU General Public License
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*  test ok one more
+
 */
-#define _GNU_SOURCE 
+#define _GNU_SOURCE
 
 #define VERSION "findMACs v1.06"
 #define COPYRIGHT "(C) 2014 Leandro Fernández - http://www.drk.com.ar/findmacs"
@@ -170,20 +172,20 @@ int main(int argc, char ** argv)
     flags |= HASH;
 
   /// START ///
-  
-  if (getifaddrs(&ifaddr_obj) == -1) 
+
+  if (getifaddrs(&ifaddr_obj) == -1)
   {
     perror("getifaddrs");
     return -1;
   }
-  
-  if (optind < argc) 
+
+  if (optind < argc)
   {
     strncpy(interface_name, argv[optind], IFNAMSIZ-1);
     interface_name[IFNAMSIZ-1]=0; // We don't want a buffer overrun here
   }
 
-  for (ifa = ifaddr_obj; ifa != NULL; ifa = ifa->ifa_next) 
+  for (ifa = ifaddr_obj; ifa != NULL; ifa = ifa->ifa_next)
   {
     //  if (interface_name[0] == 0)
    //   {
@@ -192,7 +194,7 @@ int main(int argc, char ** argv)
    //   }
 
       fd = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_ARP));
-      if (fd < 0) 
+      if (fd < 0)
       {
         perror("creting socket");
         return -1;
@@ -200,7 +202,7 @@ int main(int argc, char ** argv)
    //   memcpy(ifr.ifr_name, interface_name, strlen(interface_name));
   //    ifr.ifr_name[strlen(interface_name)]=0;
 
-      if (ifa->ifa_addr == NULL || ifa->ifa_addr->sa_family != AF_PACKET) 
+      if (ifa->ifa_addr == NULL || ifa->ifa_addr->sa_family != AF_PACKET)
           continue;
       if(strcmp(ifa->ifa_name, "lo") == 0)
 	  continue;
@@ -208,9 +210,9 @@ int main(int argc, char ** argv)
       printf("interface name: %s\n", ifa->ifa_name);
       memcpy(ifr.ifr_name, ifa->ifa_name, strlen(ifa->ifa_name));
       ifr.ifr_name[strlen(ifa->ifa_name)]=0;
-      
+
       // set timeout
-      if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) 
+      if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
       {
         perror("setting socket timeout");
         return -1;
@@ -245,7 +247,7 @@ int main(int argc, char ** argv)
       sprintf(target, "%s/24", interface_ip);
       //}
 
-      if (flags & VERBOSE) 
+      if (flags & VERBOSE)
       {
         printf("Interface %s\n", interface_name);
         printf("Local IP %s\n", interface_ip);
@@ -296,7 +298,7 @@ int getMACs(int fd, int interface_index, char mac[ETHER_ADDR_LEN], char * ip, ch
 
   // Prepare range
   split_cidr_range(target, &ip_range, &ip_count);
-  
+
 
   // Construct target address
   addr.sll_family   = AF_PACKET;
@@ -325,24 +327,24 @@ int getMACs(int fd, int interface_index, char mac[ETHER_ADDR_LEN], char * ip, ch
     memcpy(&req.arp_tpa, &ip_range.s_addr, sizeof(req.arp_tpa));
     if (flags & PRINT_REQ)
       printf("Sending ARP request for %s\n", inet_ntoa(ip_range));
-  
+
     // Send the packet
     iov[0].iov_base=&req;
     iov[0].iov_len=sizeof(req);
-    
+
     message.msg_name=&addr;
     message.msg_namelen=sizeof(addr);
     message.msg_iov=iov;
     message.msg_iovlen=1;
     message.msg_control=0;
     message.msg_controllen=0;
-    
+
     if (sendmsg(fd, &message, 0) == -1) {
       perror("sending ARP request");
       return -3;
     }
-  
-  
+
+
     r_iov[0].iov_base = buffer;
     r_iov[0].iov_len  = sizeof(req);
     reply.msg_name    = &r_addr;
@@ -352,8 +354,8 @@ int getMACs(int fd, int interface_index, char mac[ETHER_ADDR_LEN], char * ip, ch
     reply.msg_control = 0;
     reply.msg_controllen = 0;
 
-    found = 0; 
-    do { 
+    found = 0;
+    do {
       // Wait for reply
       if ((reply_len = recvmsg(fd, &reply, 0)) < 0) {
         if (errno != EAGAIN) {
@@ -364,12 +366,12 @@ int getMACs(int fd, int interface_index, char mac[ETHER_ADDR_LEN], char * ip, ch
           break;
         }
       }
-    
+
       // Check it's an ARP reply and it's for us (unless ACCEPT_ANY was given)
       rep = (struct ether_arp*)buffer;
       macarray_to_str(rep->arp_sha, macstr);
       iparray_to_str(rep->arp_spa, ipstr);
-  
+
       // If there is a HASH, search within it
       if (flags & HASH)
       {
@@ -381,15 +383,15 @@ int getMACs(int fd, int interface_index, char mac[ETHER_ADDR_LEN], char * ip, ch
 
       // Check if it's for us
       found = (*(uint32_t*)rep->arp_spa == *(uint32_t*)req.arp_tpa);
-      
-      if (ntohs(rep->arp_op) == ARPOP_REPLY 
+
+      if (ntohs(rep->arp_op) == ARPOP_REPLY
           && (found || (flags & ACCEPT_ANY))
           && (show || !(flags & HASH))
       ) {
         printf("%s\t", macstr);
         printf("%s", ipstr);
 	++matches;
-  
+
         if (flags & VERBOSE) {
           // Print ARP destination (usually our IP)
           macarray_to_str(rep->arp_tha, macstr_dest);
