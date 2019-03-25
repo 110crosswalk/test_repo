@@ -7,7 +7,7 @@
 #include <sys/socket.h>
 #include <linux/wireless.h>
 
-//online change
+//online change test
 
 int check_wireless(const char* ifname, char* protocol) {
   int sock = -1;
