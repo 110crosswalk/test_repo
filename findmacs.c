@@ -144,7 +144,7 @@ int main(int argc, char ** argv)
         return -1;
       default:
         abort ();
-    }
+    }//switch
 
   // Check it's root
   if (getuid() != 0 && !(flags & NON_ROOT))
@@ -241,7 +241,7 @@ int main(int argc, char ** argv)
     freeMAClist(mac_list, &mac_list_hash);
 
   return (matches > 0); // returns 1 if at least one MAC was printed
-}
+} //function
 
 int getMACs(int fd, int interface_index, char mac[ETHER_ADDR_LEN], char * ip, char * target, int flags, struct hsearch_data *htab)
 {

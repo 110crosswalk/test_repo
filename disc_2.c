@@ -72,6 +72,7 @@ void freeMAClist(char * mac_list, struct hsearch_data *htab);
 int getMACs(int fd, int interface_index, char mac[ETHER_ADDR_LEN], char * ip, char * target, int flags, struct hsearch_data *htab);
 
 struct ifaddrs *ifaddr_obj, *ifa;
+//another change
 
 int main(int argc, char ** argv)
 {
