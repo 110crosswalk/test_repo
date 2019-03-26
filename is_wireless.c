@@ -8,7 +8,7 @@
 #include <linux/wireless.h>
 
 //online change test very nice tool
-
+//this is a second line
 int check_wireless(const char* ifname, char* protocol) {
   int sock = -1;
   struct iwreq pwrq;
